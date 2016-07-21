@@ -15,6 +15,8 @@ has complete functionality.
 - Improve general code (full comments, better memory management..)
 - Delete single functions
 - Create reliable C++ code
+- Support for decepticons and EUR/JAP versions
+
 
 
     Copyright (C) 2016  pedro-javierf
