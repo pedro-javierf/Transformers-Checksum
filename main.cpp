@@ -1,5 +1,5 @@
-// TransformersChecksum.cpp : Defines the entry point for the console application.
-// REVISION 1.1
+// Transformers Checksum (c) by pedro-javierf
+// Rev 1.2
 
 #include <iostream> //I/O
 #include <fstream>  //File I/O
@@ -21,13 +21,10 @@ unsigned int CalcSlot1Checksum(char * memblock2, char * r12mem);
 unsigned int CalcSlot2Checksum(char * memblock2, char * r12mem);
 unsigned int CalcFileChecksum(char * memblock2, char * r12mem);
 
-//lol it is working now! 0x0000BEEF is for global checksum!!
-
 int main(int argc, char* argv[])
 {
 	
-	//File object to read ROM from disk
-	//Used to be an ifstrem but now it's a fstream to both write and read
+	//Read stream
 	std::ifstream InternalmemStream;
 	//Open file by its end (EOF) so we'll know it's exact size
 	InternalmemStream.open("internalmem.dat", std::ios::in | std::ios::binary | std::ios::ate);
@@ -38,7 +35,6 @@ int main(int argc, char* argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	//Temporal buffer to store the rom before copying to emulated memory
 	char * r12mem;
 	//Get rom size
 	std::streampos size = InternalmemStream.tellg();
@@ -53,7 +49,7 @@ int main(int argc, char* argv[])
 	InternalmemStream.close();
 	
 	
-
+	//File stream 'fstream' can both read and write to files
 	std::fstream saveStream;
 	saveStream.open("Transformers.sav", std::ios::in | std::ios::out | std::ios::binary | std::ios::ate);
 	if (!saveStream.is_open())
@@ -113,14 +109,6 @@ int main(int argc, char* argv[])
 
 	
 	
-	
-
-	//DATA
-	//0x0000BEEF -> File Checksum seed - Counter: 0x1FD -r1 file start   OK
-	//0x00000000 -> Slot 2 Checksum seed - Counter: 0xDF - r1  [.].!?New Game   OK  WE NEED TO POINT TO [] byte  0x100
-	//0X00000000 -> Slot 1 Checksum seed - Counter: 0xDF - r1  [.]'..AAAAAAAB   OK  WE NEED TO POINT TO [] byte  0x1C
-
-	
 }
 
 unsigned int CalcSlot1Checksum(char * memblock2, char * r12mem)
@@ -128,9 +116,9 @@ unsigned int CalcSlot1Checksum(char * memblock2, char * r12mem)
 
 	//Simulates registers
 	unsigned int r0 = 0x00000000; //Seed. Will also store final checksum
-	unsigned int r1 = 0x0000001C; //Memory Location 
+	unsigned int r1 = 0x0000001C; //Memory pointer to internal memory
 	unsigned int r2 = 0x000000DF; //Counter
-	unsigned int r3 = 0x00000000; //Unknown, maybe a temporal register? stores the character pointed by r1!!
+	unsigned int r3 = 0x00000000; //Byte pointed by r1
 
 	
 	bool breaker = false;
@@ -148,10 +136,10 @@ unsigned int CalcSlot1Checksum(char * memblock2, char * r12mem)
 		if (r2 == 0){ breaker = true; }
 		r2 = r2 - 1;
 
-		r3 = r3 ^ (arithmeticRightShift(r0, 0x8));  //GOOD UNTIL HERE
+		r3 = r3 ^ (arithmeticRightShift(r0, 0x8));  
 
 	
-		r3 = r3 << 1;        //Yay! //GOOD UNTIL HERE
+		r3 = r3 << 1;        
 
 
 
@@ -160,13 +148,13 @@ unsigned int CalcSlot1Checksum(char * memblock2, char * r12mem)
 			std::cout << "call to r12 mem very big: " << r3;
 			std::cin.get();
 		}
-		//YEEEEAH IT WORRKS! gets byte at r3, merges it with byte at r3+1
+		//Gets byte at r3, merges it with byte at r3+1
 		r3 = ((unsigned char)r12mem[r3] << 8) | (unsigned char)r12mem[r3 + 1]; //forget this -> It's ok but compiler fucks it when using [r3+1] In addition you have to use little endian bitch
 		r3 = _byteswap_ushort(r3); //Since nds is little endian and my PC uses big endian I'll convert it when reading from memory
 		//Unsigned int is 2 bytes -> 16 bits -> ushort
 
-		
-		r0 = r3 ^ (r0 << 0x8); //Yay! r3 = 0x00004084 this xor is the one that increments r0
+		//Boring XORs and shifts right here..
+		r0 = r3 ^ (r0 << 0x8); 
 		
 		r0 = r0 << 0x10;
 		
@@ -174,11 +162,9 @@ unsigned int CalcSlot1Checksum(char * memblock2, char * r12mem)
 		
 
 		if (breaker == true){ break; }
-		//std::cin.get();
 	}
 	std::cout << "Slot 1 Checksum(r0): " << std::hex << r0 << std::endl;
 
-	//Actually checksum is returned as little endian
 	return r0;
 }
 
