@@ -10,6 +10,7 @@ has complete functionality.
 ## TODO
 - Make tool portable (little endian snippet)
 - Improve calculation code (move from close-to-asm emulation to efficient emulation)
+- Add auto-patch to fix existing files automatically :white_check_mark:
 - Add file reload (to calculate file global checksum)
 - Improve general code (full comments, better memory management..)
 - Delete single functions
