@@ -4,8 +4,8 @@ The tool was created from reverse engineering the game, and is actually a protot
 has complete functionality.
 
 ## Included Files
-- raworiginal.s: Original assembly code from the game
 - main.c: C++ code to calculate the checksum
+- internalmem.dat: Game arm9 memory used as seed in some instructions
 
 ## TODO
 - Make tool portable (little endian snippet)
