@@ -3,8 +3,9 @@
 
 #include <iostream> //I/O
 #include <fstream>  //File I/O
-#include <intrin.h> //Win32 only, endian functions
+//#include <intrin.h> //Win32 only, endian functions
 
+#define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
 
 //By JohnScipione, Thanks!
 int logicalRightShift(int x, int n) {
@@ -208,7 +209,7 @@ unsigned int CalcSlot2Checksum(char * memblock2, char * r12mem)
 		//YEEEEAH IT WORRKS! gets byte at r3, merges it with byte at r3+1
 		r3 = ((unsigned char)r12mem[r3] << 8) | (unsigned char)r12mem[r3 + 1]; //forget this -> It's ok but compiler fucks it when using [r3+1] In addition you have to use little endian bitch
 		r3 = _byteswap_ushort(r3); //Since nds is little endian and my PC uses big endian I'll convert it when reading from memory
-
+		// ushort = 2 bytes -> unsigned 16 bits
 
 
 		r0 = r3 ^ (r0 << 0x8); //Yay! r3 = 0x00004084 this xor is the one that increments r0
@@ -263,10 +264,10 @@ unsigned int CalcFileChecksum(char * memblock2, char * r12mem)
 			std::cout << "call to r12 mem very big: " << r3;
 			std::cin.get();
 		}
-		//YEEEEAH IT WORRKS! gets byte at r3, merges it with byte at r3+1
+		//Gets byte at r3, merges it with byte at r3+1
 		r3 = ((unsigned char)r12mem[r3] << 8) | (unsigned char)r12mem[r3 + 1]; //forget this -> It's ok but compiler fucks it when using [r3+1] In addition you have to use little endian bitch
-		r3 = _byteswap_ushort(r3); //Since nds is little endian and my PC uses big endian I'll convert it when reading from memory
-
+		//r3 = _byteswap_ushort(r3); //Since nds is little endian and my PC uses big endian I'll convert it when reading from memory
+		r3 = SWAP_UINT16(r3);
 
 
 		r0 = r3 ^ (r0 << 0x8); //Yay! r3 = 0x00004084 this xor is the one that increments r0
@@ -277,7 +278,7 @@ unsigned int CalcFileChecksum(char * memblock2, char * r12mem)
 
 
 		if (breaker == true){ break; }
-		//std::cin.get();
+		
 	}
 	std::cout << "File Checksum(r0): " << std::hex << r0 << std::endl;
 

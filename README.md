@@ -8,17 +8,17 @@ has complete functionality.
 - internalmem.dat: Game arm9 memory used as seed in some instructions
 
 ## TODO
-- Make tool portable (little endian snippet)
-- Improve calculation code (move from close-to-asm emulation to efficient emulation)
-- Add auto-patch to fix existing files automatically :white_check_mark:
-- Add file reload (to calculate file global checksum)
-- Improve general code (full comments, better memory management..)
-- Delete single functions
-- Create reliable C++ code
-- Support for decepticons and EUR/JAP versions
+- [x] Make tool portable (little endian snippet)
+- [ ] Improve calculation code (move from close-to-asm emulation to efficient emulation)
+- [x] Add auto-patch to fix existing files automatically 
+- [ ] Add file reload (to calculate file global checksum)
+- [ ] Improve general code (full comments, better memory management..)
+- [ ] Delete single functions
+- [ ] Create reliable C++ code
+- [ ] Support for decepticons and EUR/JAP versions
 
 
-## Licence
+## License
     Copyright (C) 2016  pedro-javierf
 	
     This program is free software: you can redistribute it and/or modify
