@@ -1,13 +1,12 @@
 // Transformers Checksum Patcher (c) by pedro-javierf
-// Rev 1.3
+// Rev 1.3.1
 
 #include <iostream> //I/O
 #include <fstream>  //File I/O
 
 #define SWAP_UINT16(x) (((x) >> 8) | ((x) << 8))
 
-const std::string internalMemFile = "internal.dat";
-const std::string savegameFile = "Transformers.sav";
+
 
 unsigned int CalcSlotChecksum(unsigned int r1Init, char * memblock2, char * r12mem);
 unsigned int CalcFileChecksum(char * memblock2, char * r12mem);
@@ -17,12 +16,14 @@ int menu(std::fstream &saveFile, char *memoryBlock, char *r12mem);
 
 int main(int argc, char* argv[])
 {
+	std::string internalMemFile = "internalmem.dat";
+	std::string savegameFile = "Transformers.sav";
 	std::ifstream InternalmemStream;
 	//Open file by its end (EOF) so we'll know it's exact size
 	InternalmemStream.open(internalMemFile, std::ios::in | std::ios::binary | std::ios::ate);
 	if (!InternalmemStream.is_open())
 	{
-		std::cout << "[!] Can't Open internalmem.dat";
+		std::cout << "[!] Can't Open " << internalMemFile.c_str() << std::endl;
 	}
 	else
 	{
@@ -160,7 +161,7 @@ int arithmeticRightShift(int x, int n) {
 
 int menu(std::fstream &saveFile, char *memoryBlock, char *r12mem)
 {
-	unsigned int check1, check2, check3;
+	unsigned int check = 0;
 	int opt = -1;
 	std::cout << " ##### Transformers Checksum Tool #####" << std::endl << std::endl;
 
@@ -177,23 +178,22 @@ int menu(std::fstream &saveFile, char *memoryBlock, char *r12mem)
 		switch (opt)
 		{
 		case 1:
-			check1 = CalcSlotChecksum(0x0000001C, memoryBlock, r12mem);//Get checksum in little endian. Must be writen to file in big endian
+			check = CalcSlotChecksum(0x0000001C, memoryBlock, r12mem);//Get checksum in little endian. Must be writen to file in big endian
 			saveFile.seekg(0xFB);//Checksum 1 pos
-			saveFile.write(reinterpret_cast<const char *>(&check1), sizeof(check1)); 
-			std::cout << check1;
-			std::cin.get();
-			std::cin.get();
+			saveFile.write(reinterpret_cast<const char *>(&check), sizeof(check)); 
+			std::cout << check << " patched" << std::endl;
 			break;
 		case 2:
-			check2 = CalcSlotChecksum(0x00000100, memoryBlock, r12mem);
+			check = CalcSlotChecksum(0x00000100, memoryBlock, r12mem);
 			saveFile.seekg(0x1E0);//Checksum 2 pos
-			saveFile.write(reinterpret_cast<const char *>(&check2), sizeof(check2));
-			std::cin.get();
+			saveFile.write(reinterpret_cast<const char *>(&check), sizeof(check));
+			std::cout << check << " patched" << std::endl;
 			break;
 		case 3:
-			check3 = CalcFileChecksum(memoryBlock, r12mem);
+			check = CalcFileChecksum(memoryBlock, r12mem);
 			saveFile.seekg(0x1FE);//Checksum 3 pos
-			saveFile.write(reinterpret_cast<const char *>(&check3), sizeof(check3));
+			saveFile.write(reinterpret_cast<const char *>(&check), sizeof(check));
+			std::cout << "Whole file patched. Please save file now." << std::endl;
 			break;
 		case 0:
 			saveFile.close();
@@ -202,6 +202,7 @@ int menu(std::fstream &saveFile, char *memoryBlock, char *r12mem)
 			std::cout << "Invalid Option." << std::endl;
 			break;
 		}
+		std::cin.ignore();
 	}
 	return opt;
 }
